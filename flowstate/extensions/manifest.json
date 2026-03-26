@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "FlowState",
+  "version": "2.1",
+  "description": "Dev context switcher with cloud sync - saves and restores browser tab sessions across devices.",
+  "permissions": ["tabs", "storage", "scripting", "identity"],
+  "host_permissions": [
+    "<all_urls>",
+    "https://identitytoolkit.googleapis.com/*",
+    "https://firestore.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "web_accessible_resources": [{
+    "resources": ["firebase-config.js", "firebase-rest.js"],
+    "matches": ["<all_urls>"]
+  }]
+}
