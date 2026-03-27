@@ -33,11 +33,11 @@ export const authRest = {
     return data;
   },
 
-  async signInWithIdp(accessToken, provider = 'google.com') {
+  async signInWithIdp(idToken, redirectUri, provider = 'google.com') {
     const url = `${AUTH_BASE_URL}/accounts:signInWithIdp?key=${API_KEY}`;
     const payload = {
-      postBody: `access_token=${accessToken}&providerId=${provider}`,
-      requestUri: 'http://localhost',
+      postBody: `id_token=${idToken}&providerId=${provider}`,
+      requestUri: redirectUri || 'http://localhost',
       returnIdpCredential: true,
       returnSecureToken: true
     };
@@ -49,6 +49,22 @@ export const authRest = {
     const data = await response.json();
     if (!response.ok) throw new Error(data.error.message);
     return data;
+  },
+
+  async refreshToken(refreshToken) {
+    const url = `https://securetoken.googleapis.com/v1/token?key=${API_KEY}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: refreshToken }),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || 'Token refresh failed');
+    return {
+      idToken: data.id_token,
+      refreshToken: data.refresh_token,
+      expiresIn: data.expires_in
+    };
   },
 
   async getUser(idToken) {
@@ -82,15 +98,19 @@ export const firestoreRest = {
   async setDocument(path, fields, idToken) {
     const url = `${FIRESTORE_BASE_URL}/${path}`;
     const response = await fetch(url, {
-      method: 'PATCH', // PATCH works as Set with merge if we don't specify mask
+      method: 'PATCH',
       body: JSON.stringify({ fields: this.encodeFields(fields) }),
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${idToken}`
       }
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || 'Firestore error');
+    if (!response.ok) {
+      const err = new Error(data.error?.message || JSON.stringify(data));
+      err.status = response.status;
+      throw err;
+    }
     return data;
   },
 
@@ -108,7 +128,6 @@ export const firestoreRest = {
 
   async queryDocuments(collection, where, idToken) {
     const url = `${FIRESTORE_BASE_URL}:runQuery`;
-    // Simplified query for single where clause
     const query = {
       structuredQuery: {
         from: [{ collectionId: collection }],
@@ -125,15 +144,20 @@ export const firestoreRest = {
     const response = await fetch(url, {
       method: 'POST',
       body: JSON.stringify(query),
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${idToken}`
       }
     });
-    
+
     const results = await response.json();
-    if (!response.ok) throw new Error(results.error?.message || 'Firestore error');
-    
+    if (!response.ok) {
+      const msg = results.error?.message || JSON.stringify(results);
+      const err = new Error(msg);
+      err.status = response.status;
+      throw err;
+    }
+
     return results
       .filter(r => r.document)
       .map(r => this.parseDoc(r.document));

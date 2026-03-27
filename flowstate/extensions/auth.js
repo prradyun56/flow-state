@@ -31,18 +31,20 @@ googleSigninBtn.addEventListener('click', async () => {
     // For a real app, you'd use your actual Firebase Project ID and a proper redirect
     // This is a simplified demo of the flow
     const redirectUrl = chrome.identity.getRedirectURL();
-    const clientId = '488894823727-m4q57c74l7r7rrtvep9qrq7f9j3e29r5.apps.googleusercontent.com'; // Derived from SenderID
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent('email profile')}&prompt=select_account`;
+    const clientId = '488894823727-k3nrmcpcun4u60d0n7144lf4p2dfoec2.apps.googleusercontent.com';
+    const nonce = crypto.randomUUID();
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&response_type=id_token token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent('openid email profile')}&nonce=${nonce}&prompt=select_account`;
 
     const responseUrl = await chrome.identity.launchWebAuthFlow({
       url: authUrl,
       interactive: true
     });
 
-    const accessToken = new URL(responseUrl).hash.split('&')[0].split('=')[1];
-    
-    // Exchange Google access token for a real Firebase session via REST
-    const data = await authRest.signInWithIdp(accessToken);
+    const params = new URLSearchParams(new URL(responseUrl).hash.substring(1));
+    const idToken = params.get('id_token');
+
+    // Exchange Google id_token for a Firebase session via REST
+    const data = await authRest.signInWithIdp(idToken, redirectUrl);
     
     chrome.runtime.sendMessage({
       type: 'AUTH_SUCCESS',
@@ -50,7 +52,11 @@ googleSigninBtn.addEventListener('click', async () => {
         uid: data.localId,
         email: data.email,
         displayName: data.displayName || data.email.split('@')[0],
-        stsTokenManager: { accessToken: data.idToken }
+        stsTokenManager: {
+          accessToken: data.idToken,
+          refreshToken: data.refreshToken,
+          expiresAt: Date.now() + (parseInt(data.expiresIn) * 1000)
+        }
       }
     });
 
@@ -76,14 +82,18 @@ emailSigninBtn.addEventListener('click', async () => {
   try {
     setButtonLoading(emailSigninBtn, true);
     const data = await authRest.signIn(email, password);
-    
+
     chrome.runtime.sendMessage({
       type: 'AUTH_SUCCESS',
       user: {
         uid: data.localId,
         email: data.email,
         displayName: data.displayName || data.email.split('@')[0],
-        stsTokenManager: { accessToken: data.idToken }
+        stsTokenManager: {
+          accessToken: data.idToken,
+          refreshToken: data.refreshToken,
+          expiresAt: Date.now() + (parseInt(data.expiresIn) * 1000)
+        }
       }
     });
 
@@ -127,7 +137,11 @@ emailSignupBtn.addEventListener('click', async () => {
         uid: data.localId,
         email: data.email,
         displayName: data.displayName || data.email.split('@')[0],
-        stsTokenManager: { accessToken: data.idToken }
+        stsTokenManager: {
+          accessToken: data.idToken,
+          refreshToken: data.refreshToken,
+          expiresAt: Date.now() + (parseInt(data.expiresIn) * 1000)
+        }
       }
     });
 
