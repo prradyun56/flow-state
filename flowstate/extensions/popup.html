@@ -6,25 +6,24 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="header">
-    <div class="logo">◈ FlowState</div>
-    <div class="tab-count" id="tab-count">0 tabs</div>
-  </div>
-
   <div class="auth-section">
     <div class="user-info-container">
-      <span id="user-email" class="user-info">Not signed in</span>
-      <span id="last-sync" class="last-sync"></span>
+      <span id="user-email" class="user-info">NOT_CONNECTED</span>
+      <span id="last-sync" class="last-sync">--/--</span>
     </div>
-    <button id="auth-btn" class="icon-btn" title="Sign In">👤</button>
-    <span id="sync-status" class="sync-icon" title="Sync status">☁</span>
+    <button id="auth-btn" class="icon-btn" title="Sign In">[AUTH]</button>
+    <span id="sync-status" class="sync-icon" title="Sync status">●</span>
   </div>
 
+  <div class="header">
+    <div class="logo">FLOWSTATE</div>
+    <div class="tab-count" id="tab-count">0_TABS</div>
+  </div>
 
   <div class="save-section">
-    <input type="text" id="session-name" placeholder="Session name...">
-    <textarea id="session-notes" placeholder="Optional notes..."></textarea>
-    <button id="save-btn" class="btn primary-btn">Save Session</button>
+    <input type="text" id="session-name" placeholder="SESSION_ID...">
+    <textarea id="session-notes" placeholder="NOTES..."></textarea>
+    <button id="save-btn" class="btn primary-btn">COMMIT_STATE()</button>
   </div>
 
   <div id="toast" class="toast hidden"></div>

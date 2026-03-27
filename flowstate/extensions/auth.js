@@ -32,7 +32,7 @@ googleSigninBtn.addEventListener('click', async () => {
     // This is a simplified demo of the flow
     const redirectUrl = chrome.identity.getRedirectURL();
     const clientId = '488894823727-m4q57c74l7r7rrtvep9qrq7f9j3e29r5.apps.googleusercontent.com'; // Derived from SenderID
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent('email profile')}`;
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent('email profile')}&prompt=select_account`;
 
     const responseUrl = await chrome.identity.launchWebAuthFlow({
       url: authUrl,
@@ -41,19 +41,20 @@ googleSigninBtn.addEventListener('click', async () => {
 
     const accessToken = new URL(responseUrl).hash.split('&')[0].split('=')[1];
     
-    // With REST, we'd exchange this token for a Firebase idToken if needed
-    // For this context, we'll simulate success since we have the Google identity
+    // Exchange Google access token for a real Firebase session via REST
+    const data = await authRest.signInWithIdp(accessToken);
+    
     chrome.runtime.sendMessage({
       type: 'AUTH_SUCCESS',
       user: {
-        uid: 'google-' + Date.now(), // Simulated UID for demo
-        email: 'google-user@example.com', // In real use, we'd fetch profile
-        displayName: 'Google User',
-        stsTokenManager: { accessToken: accessToken }
+        uid: data.localId,
+        email: data.email,
+        displayName: data.displayName || data.email.split('@')[0],
+        stsTokenManager: { accessToken: data.idToken }
       }
     });
 
-    showSuccess('Signed in with Google!');
+    showSuccess('Authenticated securely via Firebase!');
     setTimeout(() => window.close(), 1000);
   } catch (error) {
     console.error('Google sign-in error:', error);

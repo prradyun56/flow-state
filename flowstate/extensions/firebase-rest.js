@@ -33,6 +33,24 @@ export const authRest = {
     return data;
   },
 
+  async signInWithIdp(accessToken, provider = 'google.com') {
+    const url = `${AUTH_BASE_URL}/accounts:signInWithIdp?key=${API_KEY}`;
+    const payload = {
+      postBody: `access_token=${accessToken}&providerId=${provider}`,
+      requestUri: 'http://localhost',
+      returnIdpCredential: true,
+      returnSecureToken: true
+    };
+    const response = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error.message);
+    return data;
+  },
+
   async getUser(idToken) {
     const url = `${AUTH_BASE_URL}/accounts:lookup?key=${API_KEY}`;
     const response = await fetch(url, {
