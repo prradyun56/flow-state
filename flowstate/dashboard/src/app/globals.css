@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  --bg-color: #050505;
+  --glass-bg: rgba(15, 15, 15, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(16px);
+  --text-primary: #f0f0f0;
+  --text-secondary: #888888;
+  --accent-cyan: #00e5ff;
+  --accent-red: #ff3366;
+  --accent-orange: #ffaa00;
+  --surface: rgba(15, 15, 15, 0.6);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  font-family: 'JetBrains Mono', monospace, ui-monospace, SFMono-Regular;
+  position: relative;
+  overflow-x: hidden;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+/* Light leak atmospheric layers */
+body::before, body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::before {
+  background: 
+    radial-gradient(circle at 10% 40%, rgba(0, 229, 255, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 60%, rgba(255, 51, 102, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 60% 80%, rgba(255, 170, 0, 0.1) 0%, transparent 50%);
+}
+
+body::after {
+  background: 
+    linear-gradient(105deg, transparent 20%, rgba(0,229,255,0.08) 25%, transparent 35%),
+    linear-gradient(75deg, transparent 60%, rgba(255,51,102,0.08) 65%, transparent 75%);
+  mix-blend-mode: screen;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.fade-up { animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(0,229,255,0.2); }
+  50% { box-shadow: 0 0 25px rgba(0,229,255,0.5); }
+}
+.pulse-glow { animation: pulseGlow 3s infinite; }
+
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+}
+
+.hover-glow:hover {
+  border-color: rgba(255,255,255,0.3);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5), 0 0 15px rgba(255,255,255,0.05);
+  transform: translateY(-2px);
+}
