@@ -256,7 +256,86 @@ textarea {
 
 
 .user-info.signed-in {
-  color: #00e5a0;
+  color: #fff;
+}
+
+.user-info.rank-board { color: #ffd700; }
+.user-info.rank-sc { color: #a371f7; }
+.user-info.rank-jc { color: #00e5a0; }
+
+.session-group-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 16px 0 8px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #2d3136;
+}
+
+.rank-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-left: 8px;
+}
+
+.rank-badge.board { background: rgba(255, 215, 0, 0.1); color: #ffd700; border: 1px solid #ffd700; }
+.rank-badge.sc { background: rgba(163, 113, 247, 0.1); color: #a371f7; border: 1px solid #a371f7; }
+.rank-badge.jc { background: rgba(0, 229, 160, 0.1); color: #00e5a0; border: 1px solid #00e5a0; }
+
+.session-shared-badge {
+  font-size: 10px;
+  background: #333;
+  color: #aaa;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.creator-name {
+  font-size: 11px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.share-btn:hover {
+  color: #4285f4;
+  background: rgba(66, 133, 244, 0.1);
+}
+.share-btn.active {
+  color: #4285f4;
+}
+
+.approvals-section {
+  padding: 10px 12px;
+  margin: 0 -16px 16px -16px;
+  background: #111417;
+  border-bottom: 1px solid #2d3136;
+}
+
+.approvals-section h3 {
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  color: #ffd700;
+}
+
+.approval-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background: #1a1d21;
+  border: 1px solid #2d3136;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.approval-info {
+  font-size: 12px;
+  color: #ccc;
 }
 
 .sync-icon {

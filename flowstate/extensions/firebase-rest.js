@@ -51,6 +51,18 @@ export const authRest = {
  */
 export const firestoreRest = {
   async getDocument(path, idToken) {
+    // INTERCEPT: Local Server JSON Vault
+    if (path === 'vault/master') {
+      try {
+        const response = await fetch('http://localhost:3000/vault');
+        if (!response.ok) return null;
+        return await response.json();
+      } catch (e) {
+        console.warn("Local vault server offline.", e);
+        return null; // Gracefully degrade if server isn't running
+      }
+    }
+
     const url = `${FIRESTORE_BASE_URL}/${path}`;
     const response = await fetch(url, {
       headers: { 'Authorization': `Bearer ${idToken}` }
@@ -62,6 +74,17 @@ export const firestoreRest = {
   },
 
   async setDocument(path, fields, idToken) {
+    // INTERCEPT: Local Server JSON Vault
+    if (path === 'vault/master') {
+      const response = await fetch('http://localhost:3000/vault', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fields)
+      });
+      if (!response.ok) throw new Error('Local server fault while updating vault');
+      return await response.json();
+    }
+
     const url = `${FIRESTORE_BASE_URL}/${path}`;
     const response = await fetch(url, {
       method: 'PATCH', // PATCH works as Set with merge if we don't specify mask
@@ -119,6 +142,16 @@ export const firestoreRest = {
     return results
       .filter(r => r.document)
       .map(r => this.parseDoc(r.document));
+  },
+
+  async listDocuments(collection, idToken) {
+    const url = `${FIRESTORE_BASE_URL}/${collection}?pageSize=1000`;
+    const response = await fetch(url, {
+      headers: { 'Authorization': `Bearer ${idToken}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error?.message || 'Firestore error');
+    return (data.documents || []).map(doc => this.parseDoc(doc));
   },
 
   // Helpers to handle Firestore's weird JSON format

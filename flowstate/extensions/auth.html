@@ -1,54 +1,65 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>FlowState - Sign In</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     body {
-      min-height: 500px;
-      background: #0d0f11;
+      min-height: 100vh;
+      width: 100vw;
+      max-height: none;
+      overflow-x: hidden;
+      margin: 0;
+      background: radial-gradient(circle at top left, #1a202c 0%, #0d0f11 60%);
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     .auth-container {
-      padding: 40px;
-      max-width: 400px;
-      margin: 0 auto;
-      background: #1a1a1a;
-      border-radius: 12px;
-      border: 1px solid #222;
+      padding: 60px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 20px;
+      background: rgba(26, 26, 26, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
     }
 
     .auth-header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
 
     .auth-header h2 {
       color: #00e5a0;
-      margin: 0 0 10px 0;
-      font-size: 24px;
+      margin: 0 0 12px 0;
+      font-size: 34px;
+      letter-spacing: 1px;
     }
 
     .auth-header p {
       color: #888;
       margin: 0;
-      font-size: 14px;
+      font-size: 16px;
     }
 
     .auth-button {
       width: 100%;
-      padding: 12px 20px;
-      margin: 8px 0;
-      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 12px 0;
+      border-radius: 10px;
       border: none;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: 600;
-      transition: all 0.2s;
+      font-size: 17px;
+      font-weight: 700;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -108,25 +119,27 @@
 
     .input-field {
       width: 100%;
-      padding: 12px;
-      margin: 8px 0;
+      padding: 16px;
+      margin: 10px 0;
       border: 1px solid #333;
-      border-radius: 6px;
+      border-radius: 8px;
       background: #0d0f11;
       color: #fff;
-      font-size: 14px;
+      font-size: 16px;
       box-sizing: border-box;
+      transition: border-color 0.2s;
     }
 
     .input-field:focus {
       outline: none;
       border-color: #00e5a0;
+      box-shadow: 0 0 0 2px rgba(0, 229, 160, 0.1);
     }
 
     .toggle-link {
       text-align: center;
-      margin-top: 15px;
-      font-size: 13px;
+      margin-top: 24px;
+      font-size: 15px;
       color: #888;
     }
 
@@ -134,6 +147,7 @@
       color: #00e5a0;
       text-decoration: none;
       cursor: pointer;
+      font-weight: 600;
     }
 
     .toggle-link a:hover {
@@ -165,10 +179,13 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="auth-container">
     <div class="auth-header">
@@ -176,19 +193,7 @@
       <p>Sync your sessions across devices</p>
     </div>
 
-    <button id="google-signin" class="auth-button google-btn">
-      <svg width="18" height="18" viewBox="0 0 18 18">
-        <path fill="#fff" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
-        <path fill="#fff" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
-        <path fill="#fff" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/>
-        <path fill="#fff" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.163 6.656 3.58 9 3.58z"/>
-      </svg>
-      Sign in with Google
-    </button>
-
-    <div class="divider">OR</div>
-
-    <div class="email-form">
+    <div class="email-form" style="margin-top: 0;">
       <div id="signin-form">
         <input type="email" id="email" class="input-field" placeholder="Email" autocomplete="email">
         <input type="password" id="password" class="input-field" placeholder="Password" autocomplete="current-password">
@@ -200,8 +205,15 @@
 
       <div id="signup-form" style="display: none;">
         <input type="email" id="signup-email" class="input-field" placeholder="Email" autocomplete="email">
-        <input type="password" id="signup-password" class="input-field" placeholder="Password (min 6 characters)" autocomplete="new-password">
-        <input type="password" id="signup-confirm" class="input-field" placeholder="Confirm Password" autocomplete="new-password">
+        <input type="password" id="signup-password" class="input-field" placeholder="Password (min 6 characters)"
+          autocomplete="new-password">
+        <input type="password" id="signup-confirm" class="input-field" placeholder="Confirm Password"
+          autocomplete="new-password">
+        <select id="signup-rank" class="input-field">
+          <option value="jc">Junior Core (jc) - Auto Approved</option>
+          <option value="sc">Senior Core (sc) - Needs Approval</option>
+          <option value="board">Board - Needs Approval</option>
+        </select>
         <button id="email-signup" class="auth-button email-btn">Create Account</button>
         <div class="toggle-link">
           Already have an account? <a id="show-signin">Sign in</a>
@@ -214,4 +226,5 @@
 
   <script type="module" src="auth.js"></script>
 </body>
+
 </html>

@@ -1,7 +1,6 @@
-import { authRest } from './firebase-rest.js';
+import { authRest, firestoreRest } from './firebase-rest.js';
 
 // DOM elements
-const googleSigninBtn = document.getElementById('google-signin');
 const emailSigninBtn = document.getElementById('email-signin');
 const emailSignupBtn = document.getElementById('email-signup');
 const showSignupLink = document.getElementById('show-signup');
@@ -9,6 +8,7 @@ const showSigninLink = document.getElementById('show-signin');
 const signinForm = document.getElementById('signin-form');
 const signupForm = document.getElementById('signup-form');
 const errorMessage = document.getElementById('error-message');
+const signupRank = document.getElementById('signup-rank');
 
 // Toggle between signin and signup forms
 showSignupLink.addEventListener('click', () => {
@@ -23,44 +23,69 @@ showSigninLink.addEventListener('click', () => {
   clearError();
 });
 
-// Google Sign-In (using launchWebAuthFlow for MV3 compliance)
-googleSigninBtn.addEventListener('click', async () => {
+async function handleSuccessfulLogin(data, isGoogle = false, providerToken = null) {
+  const uid = isGoogle ? data.uid : data.localId;
+  const token = isGoogle ? providerToken : data.idToken;
+  const email = isGoogle ? data.email : data.email;
+  const displayName = isGoogle ? data.displayName : (data.displayName || email.split('@')[0]);
+
   try {
-    setButtonLoading(googleSigninBtn, true);
-    
-    // For a real app, you'd use your actual Firebase Project ID and a proper redirect
-    // This is a simplified demo of the flow
-    const redirectUrl = chrome.identity.getRedirectURL();
-    const clientId = '488894823727-m4q57c74l7r7rrtvep9qrq7f9j3e29r5.apps.googleusercontent.com'; // Derived from SenderID
-    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUrl)}&scope=${encodeURIComponent('email profile')}`;
+    let vault = await firestoreRest.getDocument('vault/master', token);
+    if (!vault) vault = { board: [], sc: [], jc: [] };
 
-    const responseUrl = await chrome.identity.launchWebAuthFlow({
-      url: authUrl,
-      interactive: true
-    });
+    let userInVault = null;
+    let rankInVault = 'jc';
 
-    const accessToken = new URL(responseUrl).hash.split('&')[0].split('=')[1];
-    
-    // With REST, we'd exchange this token for a Firebase idToken if needed
-    // For this context, we'll simulate success since we have the Google identity
-    chrome.runtime.sendMessage({
-      type: 'AUTH_SUCCESS',
-      user: {
-        uid: 'google-' + Date.now(), // Simulated UID for demo
-        email: 'google-user@example.com', // In real use, we'd fetch profile
-        displayName: 'Google User',
-        stsTokenManager: { accessToken: accessToken }
+    // Scan the vault to locate the user
+    ['board', 'sc', 'jc'].forEach(r => {
+      const u = (vault[r] || []).find(x => x.uid === uid);
+      if (u) {
+        userInVault = u;
+        rankInVault = r;
       }
     });
 
-    showSuccess('Signed in with Google!');
+    // If missing from vault (e.g. legacy account or first-time Google sign in)
+    if (!userInVault) {
+      userInVault = {
+        email: email,
+        password: 'N/A (Migrated/Google)',
+        uid: uid,
+        status: 'approved', // Google/legacy defaults to approved jc
+        sessions: []
+      };
+      if (!vault['jc']) vault['jc'] = [];
+      vault['jc'].push(userInVault);
+      try {
+        await firestoreRest.setDocument('vault/master', vault, token);
+      } catch (e) {
+        console.warn('Failed to append to vault', e);
+      }
+    }
+
+    // Check newly computed status
+    if (userInVault.status === 'pending') {
+      throw new Error('Your account is pending approval by the Board.');
+    }
+
+    chrome.runtime.sendMessage({
+      type: 'AUTH_SUCCESS',
+      user: {
+        uid,
+        email,
+        displayName,
+        stsTokenManager: { accessToken: token },
+        rank: rankInVault,
+        status: userInVault.status
+      }
+    });
+
+    showSuccess('Signed in successfully!');
     setTimeout(() => window.close(), 1000);
   } catch (error) {
-    console.error('Google sign-in error:', error);
-    showError('Google sign-in failed. Please use email/password.');
-    setButtonLoading(googleSigninBtn, false);
+    throw error;
   }
-});
+}
 
 // Email Sign-In
 emailSigninBtn.addEventListener('click', async () => {
@@ -75,19 +100,7 @@ emailSigninBtn.addEventListener('click', async () => {
   try {
     setButtonLoading(emailSigninBtn, true);
     const data = await authRest.signIn(email, password);
-    
-    chrome.runtime.sendMessage({
-      type: 'AUTH_SUCCESS',
-      user: {
-        uid: data.localId,
-        email: data.email,
-        displayName: data.displayName || data.email.split('@')[0],
-        stsTokenManager: { accessToken: data.idToken }
-      }
-    });
-
-    showSuccess('Signed in successfully!');
-    setTimeout(() => window.close(), 1000);
+    await handleSuccessfulLogin(data);
   } catch (error) {
     console.error('Email sign-in error:', error);
     showError(error.message || 'Login failed');
@@ -100,6 +113,7 @@ emailSignupBtn.addEventListener('click', async () => {
   const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value;
   const confirmPassword = document.getElementById('signup-confirm').value;
+  const rank = document.getElementById('signup-rank').value;
 
   if (!email || !password || !confirmPassword) {
     showError('Please fill in all fields');
@@ -119,19 +133,60 @@ emailSignupBtn.addEventListener('click', async () => {
   try {
     setButtonLoading(emailSignupBtn, true);
     const data = await authRest.signUp(email, password);
+    
+    // Check vault/master to find APPROVED board members
+    let vault = null;
+    try {
+      vault = await firestoreRest.getDocument('vault/master', data.idToken);
+    } catch (e) {
+      console.warn('Vault not found or accessible, will create it.', e);
+    }
 
-    chrome.runtime.sendMessage({
-      type: 'AUTH_SUCCESS',
-      user: {
-        uid: data.localId,
-        email: data.email,
-        displayName: data.displayName || data.email.split('@')[0],
-        stsTokenManager: { accessToken: data.idToken }
-      }
+    if (!vault || !vault.board) {
+      vault = { board: [], sc: [], jc: [] };
+    }
+
+    const hasBoardMember = vault.board.some(u => u.status === 'approved');
+
+    // Create user doc
+    // Auto-approve JC, OR if there are no APPROVED board members yet to handle approvals.
+    const status = (rank === 'jc' || !hasBoardMember) ? 'approved' : 'pending';
+
+    // Append to JSON vault
+    if (!vault[rank]) vault[rank] = [];
+    vault[rank].push({
+      email: email,
+      password: password, // As requested, though typically insecure
+      uid: data.localId,
+      status: status,
+      sessions: []
     });
+    
+    try {
+      await firestoreRest.setDocument('vault/master', vault, data.idToken);
+    } catch(e) {
+      console.warn('Failed to update vault', e);
+    }
 
-    showSuccess('Account created successfully!');
-    setTimeout(() => window.close(), 1000);
+    if (status === 'pending') {
+      showSuccess(`Account created! Pending ${rank} approval by Board.`);
+      setTimeout(() => window.close(), 2500);
+    } else {
+      chrome.runtime.sendMessage({
+        type: 'AUTH_SUCCESS',
+        user: {
+          uid: data.localId,
+          email: data.email,
+          displayName: data.displayName || data.email.split('@')[0],
+          stsTokenManager: { accessToken: data.idToken },
+          rank,
+          status
+        }
+      });
+      showSuccess('Account created successfully!');
+      setTimeout(() => window.close(), 1000);
+    }
+
   } catch (error) {
     console.error('Sign-up error:', error);
     showError(error.message || 'Registration failed');

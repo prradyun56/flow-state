@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const authBtn = document.getElementById('auth-btn');
   const syncStatusEl = document.getElementById('sync-status');
   const lastSyncEl = document.getElementById('last-sync');
+  const approvalsSection = document.getElementById('approvals-section');
+  const approvalsListEl = document.getElementById('approvals-list');
 
   let currentUser = null;
 
@@ -17,9 +19,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (response && response.user) {
       currentUser = response.user;
       userEmailEl.textContent = response.user.displayName || response.user.email;
-      userEmailEl.classList.add('signed-in');
+      userEmailEl.className = 'user-info signed-in'; // reset classes
+      
+      const rank = (response.user.rank || 'jc').toLowerCase();
+      userEmailEl.classList.add(`rank-${rank}`);
+      
+      const rankNames = { 'jc': 'Junior Core', 'sc': 'Senior Core', 'board': 'Board' };
+      userEmailEl.textContent += ` (${rankNames[rank] || rank})`;
+
       authBtn.textContent = '⏻';
       authBtn.title = 'Sign Out';
+
+      if (rank === 'board') {
+        approvalsSection.style.display = 'block';
+        loadApprovals();
+      } else {
+        approvalsSection.style.display = 'none';
+      }
     }
   });
 
@@ -32,12 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
           if (response && response.ok) {
             currentUser = null;
             userEmailEl.textContent = 'Not signed in';
-            userEmailEl.classList.remove('signed-in');
+            userEmailEl.className = 'user-info';
             authBtn.textContent = '👤';
             authBtn.title = 'Sign In';
             syncStatusEl.classList.remove('synced', 'syncing', 'error');
             syncStatusEl.classList.add('offline');
             lastSyncEl.textContent = '';
+            approvalsSection.style.display = 'none';
             loadSessions(); // Reload to show local sessions only
             showToast('Signed out successfully', 'success');
           }
@@ -63,6 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'UPDATE_SYNC_STATUS') {
       updateSyncStatus(request.status);
+      if (request.status === 'synced') {
+        loadSessions();
+      }
     }
   });
 
@@ -94,8 +114,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function loadSessions() {
     chrome.runtime.sendMessage({ type: 'LIST_SESSIONS' }, (response) => {
-      if (response && response.ok) {
-        renderSessions(response.data);
+      if (chrome.runtime.lastError) {
+        sessionsListEl.innerHTML = `<div style="color:#f43f5e; font-size:12px; padding:10px;">Port Error: ${escapeHtml(chrome.runtime.lastError.message)}</div>`;
+        return;
+      }
+      try {
+        if (response && response.ok) {
+          renderSessions(response.data);
+        } else {
+          sessionsListEl.innerHTML = `<div style="color:#f43f5e; font-size:12px; padding:10px;">Bad Response: ${response ? response.error : 'Undefined Response'}</div>`;
+        }
+      } catch(e) {
+        sessionsListEl.innerHTML = `<div style="color:#f43f5e; font-size:10px; padding:10px; font-family:monospace;">Render Crash: ${escapeHtml(e.message)} ${escapeHtml(e.stack)}</div>`;
       }
     });
   }
@@ -103,36 +133,78 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderSessions(sessions) {
     sessionsListEl.innerHTML = '';
     
+    if (!sessions || typeof sessions.length !== 'number') {
+      sessionsListEl.innerHTML = `<div style="color:red">Corrupted Session List Rendered!</div>`;
+      return;
+    }
+
     if (sessions.length === 0) {
       sessionsListEl.innerHTML = '<div style="color: #666; font-size: 12px; text-align: center; padding: 20px;">No saved sessions.</div>';
       return;
     }
 
-    sessions.forEach(session => {
-      const card = document.createElement('div');
-      card.className = 'card';
+    const groups = { board: [], sc: [], jc: [] };
+    sessions.forEach(s => {
+      const rank = s.creator_rank || 'jc';
+      if (groups[rank]) groups[rank].push(s);
+      else groups.jc.push(s); 
+    });
 
-      const timeAgo = getTimeAgo(new Date(session.created_at));
-      const branchHtml = session.git_branch ? `<span class="meta-item card-branch">⎇ ${escapeHtml(session.git_branch)}</span>` : '';
-      const notesHtml = session.notes ? `<div class="card-notes">${escapeHtml(session.notes)}</div>` : '';
+    const rankTitles = { board: 'Board Sessions', sc: 'Senior Core Sessions', jc: 'Junior Core Sessions' };
+    const rankColors = { board: '#ffd700', sc: '#a371f7', jc: '#00e5a0' };
 
-      card.innerHTML = `
-        <div class="card-header">
-          <div class="card-title">${escapeHtml(session.name || 'Untitled Session')}</div>
-        </div>
-        <div class="card-meta">
-          <span class="meta-item">❏ ${session.tabs.length} tab${session.tabs.length !== 1 ? 's' : ''}</span>
-          ${branchHtml}
-          <span class="meta-item" style="margin-left:auto">⏱ ${timeAgo}</span>
-        </div>
-        ${notesHtml}
-        <div class="card-actions">
-          <button class="icon-btn restore-btn" data-id="${session.session_id}" title="Restore">▶</button>
-          <button class="icon-btn delete-btn" data-id="${session.session_id}" title="Delete">✕</button>
-        </div>
-      `;
+    ['board', 'sc', 'jc'].forEach(rank => {
+      if (groups[rank].length > 0) {
+        const header = document.createElement('h3');
+        header.className = 'session-group-header';
+        header.style.color = rankColors[rank];
+        header.textContent = rankTitles[rank];
+        sessionsListEl.appendChild(header);
 
-      sessionsListEl.appendChild(card);
+        groups[rank].forEach(session => {
+          const card = document.createElement('div');
+          card.className = 'card';
+
+          const timeAgo = getTimeAgo(new Date(session.created_at));
+          const branchHtml = session.git_branch ? `<span class="meta-item card-branch">⎇ ${escapeHtml(session.git_branch)}</span>` : '';
+          const notesHtml = session.notes ? `<div class="card-notes">${escapeHtml(session.notes)}</div>` : '';
+
+          const creatorRank = session.creator_rank || 'jc';
+          const rankBadge = `<span class="rank-badge ${creatorRank}">${creatorRank}</span>`;
+          const sharedBadge = session.is_shared ? `<span class="session-shared-badge">Shared</span>` : '';
+          const creatorName = session.creator_name ? `<span class="creator-name">by ${escapeHtml(session.creator_name)}</span>` : '';
+
+          let shareBtnHtml = '';
+          if (currentUser && (currentUser.rank === 'board' || currentUser.rank === 'sc') && session.user_id === currentUser.uid) {
+            const activeClass = session.is_shared ? 'active' : '';
+            shareBtnHtml = `<button class="icon-btn share-btn ${activeClass}" data-id="${session.session_id}" title="Toggle Share">🔗</button>`;
+          }
+
+          card.innerHTML = `
+            <div class="card-header">
+              <div class="card-title">
+                ${escapeHtml(session.name || 'Untitled Session')}
+                ${rankBadge}
+                ${sharedBadge}
+              </div>
+              ${creatorName}
+            </div>
+            <div class="card-meta">
+              <span class="meta-item">❏ ${session.tabs.length} tab${session.tabs.length !== 1 ? 's' : ''}</span>
+              ${branchHtml}
+              <span class="meta-item" style="margin-left:auto">⏱ ${timeAgo}</span>
+            </div>
+            ${notesHtml}
+            <div class="card-actions">
+              ${shareBtnHtml}
+              <button class="icon-btn restore-btn" data-id="${session.session_id}" title="Restore">▶</button>
+              <button class="icon-btn delete-btn" data-id="${session.session_id}" title="Delete">✕</button>
+            </div>
+          `;
+
+          sessionsListEl.appendChild(card);
+        });
+      }
     });
 
     // Add event listeners to buttons
@@ -142,6 +214,75 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', (e) => deleteSession(e.currentTarget.dataset.id));
+    });
+
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => toggleShare(e.currentTarget.dataset.id, e.currentTarget));
+    });
+  }
+
+  function toggleShare(id, btnEl) {
+    chrome.runtime.sendMessage({ type: 'TOGGLE_SHARE', session_id: id }, (response) => {
+      if (response && response.ok) {
+        if (response.is_shared) {
+          btnEl.classList.add('active');
+          showToast('Session shared.', 'success');
+        } else {
+          btnEl.classList.remove('active');
+          showToast('Session unshared.', 'success');
+        }
+        loadSessions();
+      } else {
+        showToast('Failed to toggle share.', 'error');
+      }
+    });
+  }
+
+  function loadApprovals() {
+    if (!approvalsListEl) return;
+    approvalsListEl.innerHTML = '<div style="color: #666; font-size: 12px;">Loading pending users...</div>';
+    
+    chrome.runtime.sendMessage({ type: 'GET_PENDING_APPROVALS' }, (response) => {
+      if (response && response.ok) {
+        const users = response.data || [];
+        if (users.length === 0) {
+          approvalsListEl.innerHTML = '<div style="color: #666; font-size: 12px;">No pending approvals</div>';
+          return;
+        }
+        
+        approvalsListEl.innerHTML = '';
+        users.forEach(u => {
+          const card = document.createElement('div');
+          card.className = 'approval-card';
+          card.innerHTML = `
+            <div class="approval-info">
+              <div><strong>${escapeHtml(u.email)}</strong></div>
+              <div>Rank: <span style="color:#a371f7; text-transform: uppercase;">${escapeHtml(u.rank)}</span></div>
+            </div>
+            <button class="btn primary-btn" style="padding: 4px 8px; font-size: 11px;" data-uid="${u._id}">Approve</button>
+          `;
+          
+          const btn = card.querySelector('button');
+          btn.addEventListener('click', () => {
+            btn.disabled = true;
+            btn.textContent = '...';
+            chrome.runtime.sendMessage({ type: 'APPROVE_USER', uid: u._id }, (res) => {
+              if (res && res.ok) {
+                showToast('User approved!', 'success');
+                loadApprovals();
+              } else {
+                showToast('Approval failed.', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Approve';
+              }
+            });
+          });
+          
+          approvalsListEl.appendChild(card);
+        });
+      } else {
+        approvalsListEl.innerHTML = '<div style="color: #f43f5e; font-size: 12px;">Failed to load.</div>';
+      }
     });
   }
 

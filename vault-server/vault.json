@@ -1,0 +1,582 @@
+{
+  "board": [
+    {
+      "email": "acc@gmail.com",
+      "password": "123456",
+      "uid": "Ifx6XR39ZYYaqEgISFPQhtzUDFt1",
+      "status": "approved",
+      "sessions": [
+        {
+          "session_id": "bfb07eaa-8d9c-4926-b615-ea5889f1f937",
+          "name": "Untitled Session",
+          "created_at": "2026-03-27T14:17:40.366Z",
+          "tabs": [
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://extensions/",
+              "title": "Extensions",
+              "pinned": false
+            },
+            {
+              "url": "https://gemini.google.com/app/5b286a6109b8d34b?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE",
+              "title": "Google Gemini",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "Ifx6XR39ZYYaqEgISFPQhtzUDFt1",
+          "creator_rank": "board",
+          "creator_name": "acc",
+          "is_shared": false,
+          "updated_at": "2026-03-27T14:17:40.368Z"
+        }
+      ]
+    },
+    {
+      "email": "abb@gmail.com",
+      "password": "123456",
+      "uid": "T2snUJi6TqOLgGXeMZvkRaDqVcn2",
+      "status": "approved",
+      "sessions": [
+        {
+          "session_id": "e64c66d9-fd29-4b99-b06b-b5fb735476e4",
+          "name": "Untitled Session",
+          "created_at": "2026-03-27T13:34:29.809Z",
+          "tabs": [
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://extensions/",
+              "title": "Extensions",
+              "pinned": false
+            },
+            {
+              "url": "https://gemini.google.com/app/5b286a6109b8d34b?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE",
+              "title": "Google Gemini",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "T2snUJi6TqOLgGXeMZvkRaDqVcn2",
+          "creator_rank": "board",
+          "creator_name": "abb",
+          "is_shared": false,
+          "updated_at": "2026-03-27T13:34:29.812Z"
+        },
+        {
+          "created_at": "2026-03-27T13:33:53.159Z",
+          "creator_name": "abb",
+          "creator_rank": "board",
+          "is_shared": false,
+          "name": "Untitled Session",
+          "notes": "",
+          "session_id": "a617426c-ad59-404d-8d8d-761aba907b3e",
+          "tabs": [
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "Extensions",
+              "url": "chrome://extensions/"
+            },
+            {
+              "pinned": false,
+              "title": "Google Gemini",
+              "url": "https://gemini.google.com/app/5b286a6109b8d34b?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            }
+          ],
+          "updated_at": "2026-03-27T14:34:32.840Z",
+          "user_id": "T2snUJi6TqOLgGXeMZvkRaDqVcn2"
+        },
+        {
+          "session_id": "b7772ec7-14ed-4aea-970b-b9804633c2a5",
+          "name": "Untitled Session",
+          "created_at": "2026-03-27T13:13:26.528Z",
+          "tabs": [
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://extensions/",
+              "title": "Extensions",
+              "pinned": false
+            },
+            {
+              "url": "https://gemini.google.com/app/ec03e67211c330cf?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE",
+              "title": "Google Gemini",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "T2snUJi6TqOLgGXeMZvkRaDqVcn2",
+          "creator_rank": "board",
+          "creator_name": "abb",
+          "is_shared": false,
+          "updated_at": "2026-03-27T13:13:26.530Z"
+        },
+        {
+          "session_id": "c9772b51-fd6b-4e76-85a0-e694664a888e",
+          "name": "Untitled Session",
+          "created_at": "2026-03-27T13:13:26.360Z",
+          "tabs": [
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://extensions/",
+              "title": "Extensions",
+              "pinned": false
+            },
+            {
+              "url": "https://gemini.google.com/app/ec03e67211c330cf?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE",
+              "title": "Google Gemini",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "T2snUJi6TqOLgGXeMZvkRaDqVcn2",
+          "creator_rank": "board",
+          "creator_name": "abb",
+          "is_shared": false,
+          "updated_at": "2026-03-27T13:13:26.362Z"
+        },
+        {
+          "created_at": "2026-03-27T13:13:26.153Z",
+          "creator_name": "abb",
+          "creator_rank": "board",
+          "is_shared": true,
+          "name": "Untitled Session",
+          "notes": "",
+          "session_id": "a0132a60-2741-43f5-8fcc-f6b01fb255c7",
+          "tabs": [
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "Extensions",
+              "url": "chrome://extensions/"
+            },
+            {
+              "pinned": false,
+              "title": "Google Gemini",
+              "url": "https://gemini.google.com/app/ec03e67211c330cf?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            }
+          ],
+          "updated_at": "2026-03-27T16:11:33.603Z",
+          "user_id": "T2snUJi6TqOLgGXeMZvkRaDqVcn2"
+        },
+        {
+          "session_id": "176f8d58-07ae-49ea-83b9-b41d493e47d0",
+          "name": "Untitled Session",
+          "created_at": "2026-03-27T13:13:25.572Z",
+          "tabs": [
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://extensions/",
+              "title": "Extensions",
+              "pinned": false
+            },
+            {
+              "url": "https://gemini.google.com/app/ec03e67211c330cf?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE",
+              "title": "Google Gemini",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "T2snUJi6TqOLgGXeMZvkRaDqVcn2",
+          "creator_rank": "board",
+          "creator_name": "abb",
+          "is_shared": false,
+          "updated_at": "2026-03-27T13:13:25.573Z"
+        },
+        {
+          "created_at": "2026-03-27T13:13:20.537Z",
+          "creator_name": "abb",
+          "creator_rank": "board",
+          "is_shared": true,
+          "name": "sd",
+          "notes": "",
+          "session_id": "1361254e-b78f-481a-a8db-08a6043f7d5c",
+          "tabs": [
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "Extensions",
+              "url": "chrome://extensions/"
+            },
+            {
+              "pinned": false,
+              "title": "Google Gemini",
+              "url": "https://gemini.google.com/app/ec03e67211c330cf?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            },
+            {
+              "pinned": false,
+              "title": "New Tab",
+              "url": "chrome://newtab/"
+            }
+          ],
+          "updated_at": "2026-03-27T16:11:31.792Z",
+          "user_id": "T2snUJi6TqOLgGXeMZvkRaDqVcn2"
+        }
+      ]
+    }
+  ],
+  "sc": [
+    {
+      "email": "gdg@gmail.com",
+      "password": "123456",
+      "uid": "2pnsGeINnNUOLE2bbeDtEg5wMRh1",
+      "status": "approved",
+      "sessions": [
+        {
+          "session_id": "820127b9-d650-40cb-9114-7714b3044d24",
+          "name": "test",
+          "created_at": "2026-03-27T14:04:07.389Z",
+          "tabs": [
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://extensions/",
+              "title": "Extensions",
+              "pinned": false
+            },
+            {
+              "url": "https://gemini.google.com/app/5b286a6109b8d34b?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE",
+              "title": "Google Gemini",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "2pnsGeINnNUOLE2bbeDtEg5wMRh1",
+          "creator_rank": "sc",
+          "creator_name": "gdg",
+          "is_shared": false,
+          "updated_at": "2026-03-27T14:04:07.390Z"
+        }
+      ]
+    },
+    {
+      "email": "gfg@gmail.com",
+      "password": "123456",
+      "uid": "DyGffGjx6kbFms7y5AI0kxVoa883",
+      "status": "approved",
+      "sessions": [
+        {
+          "session_id": "d7ad530e-3427-4550-88fc-8a04ac08411d",
+          "name": "test12",
+          "created_at": "2026-03-27T14:18:23.357Z",
+          "tabs": [
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://extensions/",
+              "title": "Extensions",
+              "pinned": false
+            },
+            {
+              "url": "https://gemini.google.com/app/5b286a6109b8d34b?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE",
+              "title": "Google Gemini",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "DyGffGjx6kbFms7y5AI0kxVoa883",
+          "creator_rank": "sc",
+          "creator_name": "gfg",
+          "is_shared": false,
+          "updated_at": "2026-03-27T14:18:23.358Z"
+        }
+      ]
+    }
+  ],
+  "jc": [
+    {
+      "email": "bbb@gmail.com",
+      "password": "123456",
+      "uid": "VzoXYGtZ9igEqRFb9XLyZltJQIj2",
+      "status": "approved",
+      "sessions": [
+        {
+          "session_id": "5675e468-eb63-4c5b-acb9-da0b805f5c81",
+          "name": "ccccc",
+          "created_at": "2026-03-26T21:48:39.834Z",
+          "tabs": [
+            {
+              "url": "chrome://extensions/",
+              "title": "Extensions",
+              "pinned": false
+            },
+            {
+              "url": "https://gemini.google.com/app/ec03e67211c330cf?is_sa=1&is_sa=1&android-min-version=301356232&ios-min-version=322.0&campaign_id=bkws&utm_source=sem&utm_medium=paid-media&utm_campaign=bkws&pt=9008&mt=8&ct=p-growth-sem-bkws&gclsrc=aw.ds&gad_source=1&gad_campaignid=20357620749&gbraid=0AAAAApk5BhnweU6SeFftkT2bBHQ9h4NT1&gclid=CjwKCAiAqKbMBhBmEiwAZ3UboI-V-R-7QAlad_oPqee7b-9wrDUXsH_MNW7dveu6W_tZV8oj6K4vphoCc3IQAvD_BwE",
+              "title": "Google Gemini",
+              "pinned": false
+            },
+            {
+              "url": "https://vitvellore312.examly.io/login",
+              "title": "VIT - Vellore",
+              "pinned": false
+            },
+            {
+              "url": "https://vtop.vit.ac.in/vtop/open/page",
+              "title": "VIT Vellore - VTOP",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            },
+            {
+              "url": "chrome://newtab/",
+              "title": "New Tab",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "VzoXYGtZ9igEqRFb9XLyZltJQIj2",
+          "creator_rank": "jc",
+          "creator_name": "bbb",
+          "is_shared": false,
+          "updated_at": "2026-03-26T21:48:39.835Z"
+        }
+      ]
+    },
+    {
+      "email": "anushka@gmail.com",
+      "password": "123456",
+      "uid": "Sy3vUtNepJPKQfWQ5Tm44jBzyWF3",
+      "status": "approved",
+      "sessions": [
+        {
+          "session_id": "c0fe82b2-a728-4871-a266-b981690d4803",
+          "name": "review",
+          "created_at": "2026-03-27T16:40:06.802Z",
+          "tabs": [
+            {
+              "url": "https://www.google.com/search?q=&sourceid=chrome&ie=UTF-8&udm=50&aep=48&cud=0&qsubts=1774627765624&source=chrome.crn.obic",
+              "title": "Google Search",
+              "pinned": false
+            },
+            {
+              "url": "https://www.youtube.com/",
+              "title": "YouTube",
+              "pinned": false
+            },
+            {
+              "url": "https://moovit.vit.ac.in/login/index.php",
+              "title": "Log in to the site | VIT LMS",
+              "pinned": false
+            },
+            {
+              "url": "https://vtop.vit.ac.in/vtop/open/page",
+              "title": "VIT Vellore - VTOP",
+              "pinned": false
+            },
+            {
+              "url": "https://vitvellore312.examly.io/",
+              "title": "vitvellore312.examly.io",
+              "pinned": false
+            }
+          ],
+          "notes": "",
+          "user_id": "Sy3vUtNepJPKQfWQ5Tm44jBzyWF3",
+          "creator_rank": "jc",
+          "creator_name": "anushka",
+          "is_shared": false,
+          "updated_at": "2026-03-27T16:40:06.804Z"
+        }
+      ]
+    }
+  ]
+}
