@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="auth-section">
+    <div class="user-info-container">
+      <span id="user-email" class="user-info">NOT_CONNECTED</span>
+      <span id="last-sync" class="last-sync">--/--</span>
+    </div>
+    <button id="auth-btn" class="icon-btn" title="Sign In">[AUTH]</button>
+    <button id="sync-btn" class="icon-btn sync-btn" title="Force Sync">⟳</button>
+    <span id="live-indicator" class="live-indicator" title="Live sync active"><span class="live-dot"></span>LIVE</span>
+    <span id="sync-status" class="sync-icon" title="Sync status">●</span>
+  </div>
+
+  <div id="approvals-section" class="approvals-section" style="display: none;">
+    <h3>Pending Approvals</h3>
+    <div id="approvals-list"></div>
+  </div>
+
+  <div class="header">
+    <div class="logo">FLOWSTATE</div>
+    <div class="tab-count" id="tab-count">0_TABS</div>
+    <span id="recording-indicator" class="recording-indicator" style="display:none;"><span class="rec-dot"></span> REC</span>
+  </div>
+
+  <div class="save-section">
+    <input type="text" id="session-name" placeholder="SESSION_ID...">
+    <textarea id="session-notes" placeholder="NOTES..."></textarea>
+    <button id="save-btn" class="btn primary-btn">COMMIT_STATE()</button>
+    <button id="stop-rec-btn" class="btn stop-rec-btn" style="display:none;">STOP_RECORDING()</button>
+  </div>
+
+  <div class="privacy-section" id="privacy-section">
+    <div class="privacy-header" id="privacy-toggle">
+      <span class="privacy-title">PRIVACY_FILTER()</span>
+      <span id="privacy-summary" class="privacy-summary"></span>
+      <button class="icon-btn privacy-expand-btn" id="privacy-expand-btn">▾</button>
+    </div>
+    <div id="privacy-panel" class="privacy-panel privacy-panel-hidden">
+      <div id="current-tab-status" class="privacy-tab-status"></div>
+      <button id="flag-tab-btn" class="btn privacy-btn">FLAG_THIS_TAB()</button>
+      <div class="privacy-domain-row">
+        <input type="text" id="domain-input" class="privacy-input" placeholder="DOMAIN (e.g. bank.com)">
+        <button id="add-domain-btn" class="btn privacy-btn-sm">+FLAG</button>
+      </div>
+      <div id="flagged-domains-list" class="flagged-domains-list"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <div class="sessions-list" id="sessions-list">
+    <!-- Session cards go here -->
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
