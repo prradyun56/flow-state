@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "FlowState",
+  "version": "3.0",
+  "key": "MD8BIjANCgYJKj9IPz8NCgEBAQUAAz8BDwAwPwENCgI/AQEAPz8/P3YVPzxAP1oGPz8/ED8IPz8/cz9yP2JEPz9LPz8/Rz8/P0M0Alo/Pz8/P3AiPyU/OD8PeT9yUU4/WQ0KET8/P0w/Pz80Pz8NCh0qR0A/Pz8/Pz8/bT8/Rz8fP0o/EXUBP1hrPz8WPwI/Kz8/ED8IPydhdj8/PwU/Mz8xLUI/KV4/Pz9YfBI/Dj8/ej8NCj8/XT8/ND98WycoPwk/Pz8/flg4fT8/HndoPwN2QzQ/Pz8/f0Y/PxQ0Pz0LPz8RJD8/JB0/Pz8/M315eAAwPz8/U0c/Pz93awM/PyM8P1VBcj8/TD9LPyxTPkI5Pz8/Jz99Pz9aND8/OGw/P2MteHtAdwIDAQABDQo=",
+  "description": "Dev context switcher with cloud sync - saves and restores browser tab sessions across devices.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "scripting",
+    "identity",
+    "alarms"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://identitytoolkit.googleapis.com/*",
+    "https://securetoken.googleapis.com/*",
+    "https://firestore.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "firebase-config.js",
+        "firebase-rest.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ]
+}
