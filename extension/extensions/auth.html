@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>FlowState - Sign In</title>
+  <link rel="stylesheet" hr ef="styles.css">
+  <style>
+    body {
+      min-height: 100vh;
+      width: 100vw;
+      max-height: none;
+      overflow-x: hidden;
+      margin: 0;
+      /* Clearer background override */
+      background: radial-gradient(circle at top left, #2a313e 0%, #0d0f11 80%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-container {
+      padding: 60px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 20px;
+      /* Mirroring popup glassmorphism */
+      background: var(--glass-bg, rgba(15, 15, 15, 0.4));
+      backdrop-filter: var(--glass-blur, blur(16px));
+      -webkit-backdrop-filter: var(--glass-blur, blur(16px));
+      border-radius: 4px;
+      border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 40px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .auth-header h2 {
+      color: var(--text-primary, #f0f0f0);
+      margin: 0 0 12px 0;
+      font-size: 34px;
+      letter-spacing: 0.2em;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    .auth-header p {
+      color: var(--text-secondary, #888);
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .auth-button {
+      width: 100%;
+      padding: 16px 20px;
+      margin: 12px 0;
+      border-radius: 2px;
+      border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--glass-bg, rgba(15, 15, 15, 0.4));
+      color: var(--text-primary, #f0f0f0);
+    }
+
+    .auth-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .auth-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .email-btn {
+      background: rgba(0, 229, 255, 0.1);
+      border-color: rgba(0, 229, 255, 0.4);
+      color: var(--accent-cyan, #00e5ff);
+    }
+
+    .email-btn:hover {
+      background: rgba(0, 229, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);
+    }
+
+    .email-form {
+      margin-top: 0;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 16px;
+      margin: 10px 0;
+      border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+      border-radius: 2px;
+      background: rgba(0, 0, 0, 0.4);
+      color: var(--text-primary, #fff);
+      font-size: 15px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.1em;
+      box-sizing: border-box;
+      transition: all 0.3s;
+    }
+
+    .input-field::placeholder {
+      color: #555;
+      text-transform: uppercase;
+    }
+
+    .input-field:focus {
+      outline: none;
+      border-color: var(--accent-cyan, #00e5ff);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.1);
+    }
+
+    .toggle-link {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary, #888);
+      text-transform: uppercase;
+    }
+
+    .toggle-link a {
+      color: var(--accent-cyan, #00e5ff);
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 700;
+      margin-left: 4px;
+    }
+
+    .toggle-link a:hover {
+      text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-secondary, #555);
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--glass-border, rgba(255, 255, 255, 0.1));
+    }
+
+    .divider span {
+      padding: 0 16px;
+    }
+
+    .google-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text-primary, #f0f0f0);
+    }
+
+    .google-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 15px rgba(255, 255, 255, 0.08);
+    }
+
+    .google-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .error-message {
+      color: var(--accent-red, #ff3366);
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(255, 51, 102, 0.1);
+      border: 1px solid rgba(255, 51, 102, 0.2);
+      border-radius: 2px;
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: center;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      border-top-color: var(--accent-cyan, #00e5ff);
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Position application screen */
+    .position-app-container {
+      max-width: 520px;
+    }
+
+    .position-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .position-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px 18px;
+      border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.1));
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.25);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .position-card:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .position-card input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      margin: 2px 0 0 0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .position-card input[type="radio"]:checked {
+      border-color: var(--accent-cyan, #00e5ff);
+      background: radial-gradient(circle, var(--accent-cyan, #00e5ff) 40%, transparent 45%);
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+    }
+
+    .position-card:has(input:checked) {
+      border-color: rgba(0, 229, 255, 0.4);
+      background: rgba(0, 229, 255, 0.06);
+    }
+
+    .position-card-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .position-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .position-desc {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-secondary, #888);
+      letter-spacing: 0.05em;
+      line-height: 1.5;
+    }
+
+    .board-color  { color: #f5c518; }
+    .sc-color     { color: #a855f7; }
+    .jc-color     { color: #22c55e; }
+  </style>
+</head>
+
+<body>
+  <div class="auth-container">
+    <div class="auth-header">
+      <h2>◈ FlowState</h2>
+      <p>Sync your sessions across devices</p>
+    </div>
+
+    <div class="email-form" style="margin-top: 0;">
+      <div id="signin-form">
+        <input type="email" id="email" class="input-field" placeholder="Email" autocomplete="email">
+        <input type="password" id="password" class="input-field" placeholder="Password" autocomplete="current-password">
+        <button id="email-signin" class="auth-button email-btn">Sign In</button>
+        <div class="toggle-link">
+          Don't have an account? <a id="show-signup">Sign up</a>
+        </div>
+      </div>
+
+      <div id="signup-form" style="display: none;">
+        <!-- Step 1: Type Selection -->
+        <div id="signup-type-selection">
+          <p style="color:var(--text-secondary,#888); margin-bottom: 20px; font-family:'JetBrains Mono',monospace; font-size:13px; text-align:center;">HOW WILL YOU USE FLOWSTATE?</p>
+          <div class="position-cards">
+            <label class="position-card" data-type="individual">
+              <input type="radio" name="account-type" value="individual" checked>
+              <div class="position-card-inner">
+                <span class="position-title" style="color:#00e5ff;">Individual</span>
+                <span class="position-desc">Personal workspace. Synchronize your own sessions without organization overhead.</span>
+              </div>
+            </label>
+            <label class="position-card" data-type="organization">
+              <input type="radio" name="account-type" value="organization">
+              <div class="position-card-inner">
+                <span class="position-title" style="color:#ff3366;">Organization</span>
+                <span class="position-desc">Create a team vault with a custom rank hierarchy, sharing controls, and approvals.</span>
+              </div>
+            </label>
+          </div>
+          <button id="btn-next-step" class="auth-button email-btn" style="margin-top:20px;">Continue</button>
+          
+          <div class="toggle-link">
+            Already have an account? <a id="show-signin" style="cursor:pointer;">Sign in</a>
+          </div>
+        </div>
+
+        <!-- Step 2: Form Details -->
+        <div id="signup-details" style="display: none;">
+          <input type="text" id="signup-name" class="input-field" placeholder="Full Name" autocomplete="name">
+          <input type="email" id="signup-email" class="input-field" placeholder="Email" autocomplete="email">
+          <input type="password" id="signup-password" class="input-field" placeholder="Password (min 6 characters)" autocomplete="new-password">
+          <input type="password" id="signup-confirm" class="input-field" placeholder="Confirm Password" autocomplete="new-password">
+          
+          <div id="org-details" style="display:none; margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.1);">
+             <h3 style="color:#fff; font-family:'JetBrains Mono',monospace; font-size:14px; margin-bottom:10px;">ORGANIZATION SETUP</h3>
+             <input type="text" id="org-name" class="input-field" placeholder="Organization Name">
+             
+             <p style="color:#888; font-size:11px; font-family:'JetBrains Mono',monospace; margin-top:15px; margin-bottom:5px;">HIERARCHY RANKS (Top down)</p>
+             <div id="rank-builder" style="display:flex; flex-direction:column; gap:8px;">
+                <!-- Ranks injected via JS -->
+             </div>
+             
+             <div style="display:flex; gap:10px; margin-top:15px;">
+               <button id="add-lower-rank" class="auth-button email-btn" style="padding:10px; font-size:12px; margin:0; flex:1;">+ Lower Rank ⬇</button>
+               <button id="add-same-rank" class="auth-button email-btn" style="padding:10px; font-size:12px; margin:0; flex:1;">+ Co-Rank 🟰</button>
+             </div>
+          </div>
+
+          <button id="email-signup" class="auth-button email-btn" style="margin-top: 20px;">Create Account</button>
+          <button id="btn-back-step" class="auth-button" style="margin-top:10px; background:transparent; border-color:transparent; color:#888; font-size:14px;">Back</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"><span>or</span></div>
+
+    <button id="google-signin" class="auth-button google-btn">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+          fill="#4285F4" />
+        <path
+          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+          fill="#34A853" />
+        <path
+          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+          fill="#FBBC05" />
+        <path
+          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+          fill="#EA4335" />
+      </svg>
+      Sign in with Google
+    </button>
+
+    <div id="error-message" class="error-message"></div>
+  </div>
+
+  <!-- Removed static Position Application block, now handled via dynamic ranks at sign-up -->
+
+  <script type="module" src="auth.js"></script>
+  <!-- Custom Cinematic Color Picker -->
+  <div id="custom-color-picker" class="color-picker-flyout hidden">
+    <div class="color-picker-header">
+      <span style="font-size:10px; color:rgba(255,255,255,0.5); letter-spacing:0.1em; text-transform:uppercase;">Select Core Tint</span>
+    </div>
+    <div class="color-preset-grid">
+      <div class="color-blob" style="background: #ff3366;" data-hex="#ff3366"></div>
+      <div class="color-blob" style="background: #ffaa00;" data-hex="#ffaa00"></div>
+      <div class="color-blob" style="background: #ffd700;" data-hex="#ffd700"></div>
+      <div class="color-blob" style="background: #00e5a0;" data-hex="#00e5a0"></div>
+      <div class="color-blob" style="background: #00e5ff;" data-hex="#00e5ff"></div>
+      <div class="color-blob" style="background: #0088ff;" data-hex="#0088ff"></div>
+      <div class="color-blob" style="background: #7733ff;" data-hex="#7733ff"></div>
+      <div class="color-blob" style="background: #a371f7;" data-hex="#a371f7"></div>
+      <div class="color-blob" style="background: #ff55aa;" data-hex="#ff55aa"></div>
+      <div class="color-blob" style="background: #ffffff;" data-hex="#ffffff"></div>
+      <div class="color-blob" style="background: #aaaaaa;" data-hex="#aaaaaa"></div>
+      <div class="color-blob" style="background: #444444;" data-hex="#444444"></div>
+    </div>
+    <div class="color-picker-custom">
+      <input type="text" id="color-picker-hex" class="input-field" style="width: 100%; text-align: center; text-transform: uppercase;" placeholder="#FFFFFF">
+    </div>
+  </div>
+
+  <style>
+    /* Cinematic Color Picker for Auth */
+    .color-picker-flyout {
+      position: absolute;
+      background: #0a0a0a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 4px;
+      padding: 12px;
+      width: 220px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .color-picker-flyout.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+    }
+    .color-preset-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .color-blob {
+      height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    }
+    .color-blob:hover {
+      transform: scale(1.15);
+      border-color: rgba(255,255,255,0.4);
+    }
+    .custom-color-btn {
+      width: 36px; height: 36px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.2s ease;
+    }
+    .custom-color-btn:hover {
+      border-color: rgba(255,255,255,0.3);
+      filter: brightness(1.2);
+    }
+  </style>
+</body>
+
+</html>
