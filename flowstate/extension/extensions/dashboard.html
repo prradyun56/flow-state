@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowState — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-text">FLOWSTATE</span>
+      <span class="brand-sub">DASHBOARD</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-section="sessions"><span class="nav-icon">❏</span><span class="nav-label">Sessions</span></button>
+      <button class="nav-item" data-section="organizations"><span class="nav-icon">⊞</span><span class="nav-label">Organizations</span></button>
+      <button class="nav-item" data-section="members"><span class="nav-icon">👥</span><span class="nav-label">Members</span></button>
+      <button class="nav-item" data-section="roles"><span class="nav-icon">🎭</span><span class="nav-label">Roles</span></button>
+      <button class="nav-item" data-section="invites"><span class="nav-icon">🔗</span><span class="nav-label">Invites</span></button>
+      <button class="nav-item" data-section="privacy"><span class="nav-icon">🔐</span><span class="nav-label">Privacy</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user-info">
+        <span id="sidebar-user-email" class="sidebar-user-email">Not signed in</span>
+        <span id="sidebar-user-role" class="sidebar-user-role"></span>
+      </div>
+      <button id="sidebar-logout-btn" class="sidebar-logout-btn" title="Logout">⏻</button>
+    </div>
+  </aside>
+
+  <main class="main-panel" id="main-panel">
+    <section class="view-section active" id="view-sessions">
+      <div class="view-header"><h1 class="view-title">Sessions</h1>
+        <input type="text" id="dash-session-search" class="dash-input" placeholder="Search sessions...">
+      </div>
+      <div class="session-grid" id="dash-sessions-list"><div class="empty-state">Loading…</div></div>
+    </section>
+
+    <section class="view-section" id="view-organizations">
+      <div class="view-header"><h1 class="view-title">Organizations</h1>
+        <button id="dash-create-org-btn" class="dash-btn dash-btn-primary">+ New Workspace</button>
+      </div>
+
+      <!-- Organization Search -->
+      <div class="dash-card" style="margin-bottom: 30px;">
+        <input type="text" id="dash-org-search" class="dash-input" style="width: 100%;" placeholder="Search for public workspaces to join...">
+        <div id="dash-search-results" class="search-results hidden">
+          <!-- Results injected via JS -->
+        </div>
+      </div>
+
+      <div class="org-grid" id="dash-org-list"><div class="empty-state">Loading…</div></div>
+    </section>
+
+    <section class="view-section" id="view-members">
+      <div class="view-header"><h1 class="view-title">Members</h1>
+        <input type="text" id="dash-member-search" class="dash-input" placeholder="Search members...">
+      </div>
+      <div id="dash-members-list"><div class="empty-state">Loading…</div></div>
+    </section>
+
+    <section class="view-section" id="view-roles">
+      <div class="view-header"><h1 class="view-title">Roles & Permissions</h1></div>
+      <div class="roles-grid" id="dash-roles-list"><div class="empty-state">Loading…</div></div>
+    </section>
+
+    <section class="view-section" id="view-invites">
+      <div class="view-header"><h1 class="view-title">Invite Members</h1></div>
+      <div class="invite-panel">
+        <div class="invite-form">
+          <label class="dash-label">Role</label>
+          <select id="dash-invite-role" class="dash-select"></select>
+          <button id="dash-create-invite-btn" class="dash-btn dash-btn-primary" style="margin-top:16px;">Generate Invite Link</button>
+        </div>
+        <div id="dash-invite-result" class="invite-result" style="display:none;">
+          <label class="dash-label">Invite Link</label>
+          <div class="invite-link-box">
+            <input type="text" id="dash-invite-link" class="dash-input" readonly>
+            <button id="dash-copy-invite" class="dash-btn">Copy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view-section" id="view-privacy">
+      <div class="view-header"><h1 class="view-title">Privacy Settings</h1></div>
+      <div class="privacy-dash-grid">
+        <div class="dash-card">
+          <h2 class="dash-card-title">Flagged Domains</h2>
+          <p class="dash-card-desc">Tabs on these domains are excluded from recording.</p>
+          <div class="domain-add-row">
+            <input type="text" id="dash-domain-input" class="dash-input" placeholder="e.g. bank.com">
+            <button id="dash-add-domain-btn" class="dash-btn dash-btn-primary">+ Add</button>
+          </div>
+          <div id="dash-domain-list" class="domain-list"></div>
+        </div>
+        <div class="dash-card">
+          <h2 class="dash-card-title">Flagged Tabs</h2>
+          <p class="dash-card-desc">Individual tabs currently excluded from recording.</p>
+          <div id="dash-flagged-tabs-list" class="domain-list"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="dash-toast" class="dash-toast hidden"></div>
+
+  <!-- Custom Modal for Workspace Creation -->
+  <div id="create-workspace-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+      <h2 class="dash-card-title" style="margin-bottom: 20px;">Create New Workspace</h2>
+      <input type="text" id="workspace-name-input" class="dash-input" placeholder="Workspace name" style="width: 100%; margin-bottom: 20px;">
+      
+      <p style="color:#888; font-size:11px; margin-bottom:10px;">HIERARCHY RANKS (Top down)</p>
+      <div id="dash-rank-builder" style="display:flex; flex-direction:column; gap:8px;">
+         <!-- Ranks injected via JS -->
+      </div>
+      
+      <div style="display:flex; gap:10px; margin-top:15px; margin-bottom: 20px;">
+        <button id="dash-add-lower-rank" class="dash-btn" style="flex:1;">+ Lower Rank ⬇</button>
+        <button id="dash-add-same-rank" class="dash-btn" style="flex:1;">+ Co-Rank 🟰</button>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label class="cinematic-toggle" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+          <input type="checkbox" id="public-workspace-toggle" checked style="display:none;">
+          <div class="toggle-slider"></div>
+          <span style="font-size:12px; color:var(--text-color); font-weight:500;">Public Workspace (Searchable)</span>
+        </label>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button id="btn-cancel-workspace" class="dash-btn">Cancel</button>
+        <button id="btn-submit-workspace" class="dash-btn dash-btn-primary">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Cinematic Color Picker -->
+  <div id="custom-color-picker" class="color-picker-flyout hidden">
+    <div class="color-picker-header">
+      <span style="font-size:10px; color:var(--text-muted); letter-spacing:0.1em; text-transform:uppercase;">Select Core Tint</span>
+    </div>
+    <div class="color-preset-grid">
+      <div class="color-blob" style="background: #ff3366;" data-hex="#ff3366"></div>
+      <div class="color-blob" style="background: #ffaa00;" data-hex="#ffaa00"></div>
+      <div class="color-blob" style="background: #ffd700;" data-hex="#ffd700"></div>
+      <div class="color-blob" style="background: #00e5a0;" data-hex="#00e5a0"></div>
+      <div class="color-blob" style="background: #00e5ff;" data-hex="#00e5ff"></div>
+      <div class="color-blob" style="background: #0088ff;" data-hex="#0088ff"></div>
+      <div class="color-blob" style="background: #7733ff;" data-hex="#7733ff"></div>
+      <div class="color-blob" style="background: #a371f7;" data-hex="#a371f7"></div>
+      <div class="color-blob" style="background: #ff55aa;" data-hex="#ff55aa"></div>
+      <div class="color-blob" style="background: #ffffff;" data-hex="#ffffff"></div>
+      <div class="color-blob" style="background: #aaaaaa;" data-hex="#aaaaaa"></div>
+      <div class="color-blob" style="background: #444444;" data-hex="#444444"></div>
+    </div>
+    <div class="color-picker-custom">
+      <input type="text" id="color-picker-hex" class="dash-input" style="width: 100%; text-align: center; text-transform: uppercase;" placeholder="#FFFFFF">
+    </div>
+  </div>
+
+  <style>
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.hidden {
+      display: none;
+    }
+    .modal-content {
+      background: var(--surface-light);
+      padding: 30px;
+      border-radius: 8px;
+      width: 400px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    
+    .org-dropdown {
+      position: absolute;
+      top: calc(100% + 5px);
+      right: 0;
+      background: var(--surface-light);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      min-width: 150px;
+      z-index: 100;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      padding: 5px;
+    }
+    .org-dropdown.hidden {
+      display: none;
+    }
+    .dropdown-item {
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 12px;
+      cursor: pointer;
+      border-radius: 2px;
+    }
+    .dropdown-item:hover {
+      background: var(--bg-surface);
+      color: #fff;
+    }
+    
+    /* Cinematic Color Picker */
+    .color-picker-flyout {
+      position: absolute;
+      background: var(--bg-surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 12px;
+      width: 220px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .color-picker-flyout.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(10px);
+    }
+    .color-preset-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .color-blob {
+      height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      box-shadow: 0 0 0 rgba(0,0,0,0);
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    }
+    .color-blob:hover {
+      transform: scale(1.15);
+      border-color: rgba(255,255,255,0.4);
+    }
+    .custom-color-btn {
+      width: 36px; height: 36px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: 1px solid var(--glass-border);
+      transition: all 0.2s ease;
+    }
+    .custom-color-btn:hover {
+      border-color: rgba(255,255,255,0.3);
+      filter: brightness(1.2);
+    }
+
+    /* Cinematic Toggle */
+    .toggle-slider {
+      width: 44px; height: 22px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      position: relative;
+      transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      background: rgba(255,255,255,0.4);
+      border-radius: 50%;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+    }
+    input:checked + .toggle-slider {
+      background: rgba(0,229,160,0.15);
+      border-color: rgba(0,229,160,0.4);
+    }
+    input:checked + .toggle-slider::before {
+      transform: translateX(22px);
+      background: #00e5a0;
+    }
+
+    /* Hierarchy Dropdowns */
+    .org-hierarchy {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .rank-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .rank-header {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      align-self: flex-start;
+    }
+    .member-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    /* Search Results */
+    .search-results {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .search-result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      transition: border-color 0.2s;
+    }
+    .search-result-row:hover {
+      border-color: rgba(255,255,255,0.1);
+    }
+  </style>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
