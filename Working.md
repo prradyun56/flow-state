@@ -1,98 +1,107 @@
-# FlowState Extension - Detailed Architecture & Working
+# FlowState Documentation
 
-FlowState is a Chrome Extension designed to serve as a developer context switcher, allowing users to save and restore browser tab sessions across devices. It uses Firebase for cloud synchronization and implements a role-based access control (RBAC) system.
+## Project Overview
 
-## Project Structure
+**FlowState** is a Chromium-based browser extension designed for session management, team collaboration, and workspace recording. It allows users to group, save, and restore tabs collectively as "sessions", tracking exact scroll positions to let users resume work instantly. 
 
-*   **`manifest.json`**: The central configuration file for the Manifest V3 extension, defining permissions, entry points, and policies.
-*   **`background.js`**: The service worker, acting as the background script handling events like tab changes, window closures, and communication with other parts of the extension.
-*   **`popup.html` & `popup.js`**: The user interface of the extension popup, where users manage their sessions.
-*   **`auth.html` & `auth.js`**: The authentication UI and logic for signing in/up using Google or Email/Password.
-*   **`storage.js`**: The local and cloud storage manager, handling data synchronization.
-*   **`firebase-rest.js`**: A custom wrapper around Firebase REST APIs to ensure compatibility with Manifest V3 CSP.
-*   **`firebase-config.js`**: Contains Firebase project credentials.
-*   **`styles.css`**: Styling for the popup and authentication pages.
+A central feature of FlowState is its **Organizational Collaboration Model**. Users can create or join Workspaces, invite other users via custom links, define custom hierarchical roles (with tailored RGB styling and specific granular permissions), and selectively share browser sessions across the organization.
 
-## 1. Extension Core (Manifest V3)
+## Architecture
 
-The extension is built using the latest Manifest V3 (MV3) architecture. The key constraints of MV3 include:
-*   No execution of remotely hosted code (hence no standard Firebase JS SDK).
-*   Background processes are handled by Service Workers, which can sleep/wake up and cannot rely on persistent in-memory global variables across sleep cycles.
+At its core, the project is a **Manifest V3 (MV3)** Chrome Extension built utilizing Vanilla HTML, CSS, and modern JavaScript. It eschews heavy modern frameworks (like React or Vue) mostly to remain ultra-lightweight and rapidly responsive, heavily utilizing native DOM manipulation and the Web API.
 
-To accommodate this, the extension uses direct HTTP requests to Firebase REST APIs (`firebase-rest.js`) and stores its critical state in `chrome.storage.local` and `chrome.storage.session` to rehydrate state upon service worker wake-ups.
+### Backend Infrastructure
+The extension relies completely on **Google Firebase** (specifically Cloud Firestore & Authentication). However, due to the restrictions of MV3 Service Workers—which do not have access to standard DOM constructs used by classic Firebase SDKs—the project accesses Firebase using a specialized **Firebase REST implementation**.
 
-## 2. Authentication Flow (`auth.html`, `auth.js`, `firebase-rest.js`)
+To ensure near-instantaneous load times, the extension heavily uses an aggressive local caching setup via `chrome.storage.local`. A sync engine (`storage.js`) periodically aggregates data from Firestore in the background and commits it to local storage. Therefore, UI rendering scripts (like the Dashboard) almost always perform ultra-fast reads from local storage instead of waiting on network delays.
 
-Due to MV3 constraints, the standard Firebase Authentication SDK is not used. Instead, a custom authentication flow is implemented.
+### The Backend Data Pipeline
 
-### Google Sign-In
-1.  **OAuth Flow**: When the user clicks "Sign in with Google", `auth.js` uses `chrome.identity.launchWebAuthFlow` to initiate an OAuth 2.0 flow with Google.
-2.  **Access Token**: Google returns an access token in the redirect URL fragment.
-3.  **Firebase Exchange**: The Google access token is sent to the Firebase Identity Toolkit REST API (via `authRest.signInWithIdp`) to exchange it for a Firebase ID token.
-4.  **Vault Verification**: The user's UID is checked against the centralized Firestore database (`vault/master`).
-5.  **Role Assignment / Completion**: If the user exists and is approved, their details are saved to `chrome.storage.local`, and the popup is notified. If they are new, they are prompted to apply for a position (rank).
+Because FlowState leverages a service worker and strict MV3 security paradigms, data does not flow directly from the UI to the database. Instead, it follows a strict, one-way declarative pipeline:
 
-### Email/Password Sign-In/Up
-1.  **API interaction**: Custom forms capture credentials.
-2.  **REST API**: Sends requests to `accounts:signUp` or `accounts:signInWithPassword` via `authRest`.
-3.  **Vault Update**: On sign-up, the user is added to `vault/master` under their selected rank. Junior Core (`jc`) members are automatically approved, while higher tiers requires Board approval.
+1. **User Action (UI Layer):** A user clicks "Create Workspace" or "Save Session" in `dashboard.js` or `popup.js`.
+2. **Message Dispatch:** The UI cannot talk to Firebase directly for complex logic. Instead, it fires off a lightweight `chrome.runtime.sendMessage({ type: 'CREATE_ORG', ... })`.
+3. **Background Router (`background.js`):** The service worker receives this message. It serves as the authoritative orchestrator, ensuring the request is valid.
+4. **Manager Delegation:** The router passes the payload to a Business Logic Manager (e.g., `orgManager.createOrg()`). Here, RBAC permissions are verified via `role-manager.js`.
+5. **REST API Execution (`firebase-rest.js`):** The Manager invokes the custom Firebase REST wrapper. A `POST` or `PATCH` request is structured, signed with the user's secret Identity Token, and sent over the wire to Google Firestore.
+6. **Cloud Confirmation & Cache Update:** Firestore processes the change and returns a successful HTTP 200 response. `storage.js` is immediately triggered to run a sync, fetching the updated state from the cloud and overwriting `chrome.storage.local`.
+7. **UI Re-render:** The background worker sends a `true` callback back to the UI which originally sent the message, or the UI listens for `chrome.storage.onChanged`. The Dashboard instantly re-renders using the fresh local cache.
 
-## 3. Storage & Synchronization (`storage.js`)
+---
 
-The `StorageManager` class orchestrates data between `chrome.storage.local` (for fast UI rendering) and Firebase Firestore (for synchronization).
+## Technical File Breakdown
 
-### Data Model
-Data is stored within a single Firestore document: `vault/master`. It contains arrays for each rank (`board`, `sc`, `jc`). Inside these rank arrays are user objects, which contain an array of `sessions`.
+The major application source code lives inside the `/extension/extensions/` directory.
 
-```json
-{
-  "board": [
-    {
-      "uid": "123",
-      "email": "user@example.com",
-      "status": "approved",
-      "sessions": [ { "session_id": "abc", "name": "...", "tabs": [...] } ]
-    }
-  ],
-  "jc": [...]
-}
-```
+### Core Entry & Configuration
 
-### Sync Strategy
-*   **Polling**: Instead of persistent WebSocket connections (which can keep the service worker awake needlessly or fail due to sleep), the extension polls Firestore every 30 seconds using `setInterval`.
-*   **Full Sync (`fullSync`)**: Performed on initialization. It pushes any local sessions that exist only locally (not in the cloud) to Firestore, and then pulls permitted cloud sessions to local storage.
-*   **Pull Sync (`syncFromCloud`)**: Periodically checks the cloud. It downloads the `vault/master` document, calculates a hash, and compares it to a locally cached hash. If the hash has changed, it re-evaluates which sessions the current user is permitted to see and updates `chrome.storage.local`.
-*   **Message Broadcasting**: When cloud data is synced and local storage is updated, `broadcastUpdate` sends a `CLOUD_UPDATED` message, causing the UI to re-render.
+#### `manifest.json`
+* **What it does:** It is the core blueprint of the Chrome Extension. It defines the name, version, icons, and fundamental structure.
+* **How it does it:** Declares the `background.js` as the Service Worker, registers `content.js` to run on all URLs, specifies the `popup.html` for the browser action, and requests necessary permissions like `storage`, `tabs`, and various host permissions.
+* **Why it's important:** Without this file, Chrome doesn't know the extension exists. It defines the security boundary and the scope of what the extension is allowed to do within the user's browser.
 
-## 4. Role-Based Access Control (RBAC)
+#### `firebase-config.js`
+* **What it does:** Stores the public configuration variables needed to connect to the Firebase backend.
+* **How it does it:** Exports a constant Javascript object containing structural keys such as `apiKey`, `authDomain`, `projectId`, and `storageBucket`.
+* **Why it's important:** It provides the connection parameters required by `firebase-rest.js` to correctly route authentication and database requests to the specific Google Cloud project hosting FlowState's data.
 
-Access to sessions is strictly governed by the user's assigned rank, evaluated during the `_pullFromCloud` operation in `storage.js`.
+#### `firebase-rest.js`
+* **What it does:** A custom-built, lightweight library wrapping Firebase's native HTTP REST APIs for Firestore and Authentication.
+* **How it does it:** It uses native `fetch()` calls to send GET, POST, and PATCH requests to Google's Identity Toolkit and Firestore endpoints, manually attaching the user's authentication token (`idToken`) in Authorization headers to secure the payloads.
+* **Why it's important:** Manifest V3 Service Workers cannot run the official modular Firebase JS SDK reliably because they lack full DOM environments (like `window` or `document`). This file bypasses those limitations, ensuring guaranteed cloud communication without bloating the extension's binary size.
 
-*   **JC (Junior Core)**: Can only view their own sessions and sessions marked as `is_shared = true` by other users.
-*   **SC (Senior Core)**: Can view their own sessions, any session created by a JC, and any session marked as shared.
-*   **Board**: Can view everything (their own, SC, and JC sessions), and manages approvals for pending user accounts via the popup.
+### Managers (Business Logic)
 
-## 5. Live Recording System (`background.js`)
+#### `storage.js`
+* **What it does:** The synchronization heart and local caching engine.
+* **How it does it:** It maintains background polling loops (calling `syncFromCloud()` or `fullSync()`) to periodically fetch organizations, members, roles, and sessions. It then deposits this data into `chrome.storage.local`.
+* **Why it's important:** Fetching data from the cloud on-demand is slow and jittery. By caching organization states locally, UI components like the Popup and Dashboard can render instantly from local storage, creating a lightning-fast, highly responsive user experience.
 
-The extension can "record" a active window, continuously taking snapshots of its open tabs.
+#### `org-manager.js`
+* **What it does:** Manages all logic related to Workspaces (Organizations).
+* **How it does it:** Provides functions to create a new organization, update organization settings, and handle adding/removing users from specific workspaces. It communicates with `firebase-rest.js` to commit these operational changes to the cloud.
+* **Why it's important:** It enforces the business rules of organization management, abstracting away the raw database queries from the UI files so that the background service worker can cleanly manage workspace state.
 
-1.  **Initiation**: Triggered from the popup (`START_RECORDING`). The `windowId` and `sessionId` are saved in `chrome.storage.session`.
-2.  **Event Listeners**: `background.js` registers synchronous listeners for `chrome.tabs.onCreated`, `onRemoved`, `onUpdated`, `onActivated`, `onMoved`, `onAttached`, `onDetached`, and `chrome.windows.onRemoved`.
-3.  **Debounced Snapshots**: When a tab event fires for the recorded window, `snapshotAndSave()` is called. This function is debounced by 300ms using `setTimeout` to prevent spamming the database during rapid tab operations (like closing 10 tabs at once).
-4.  **Local Save**: The snapshot updates the session directly in `chrome.storage.local`.
-5.  **Debounced Cloud Sync**: After updating local storage, an alarm (`chrome.alarms.create`) is set to sync changes to the cloud 5 seconds later.
+#### `role-manager.js`
+* **What it does:** Handles Role-Based Access Control (RBAC) across workspaces.
+* **How it does it:** It evaluates if a specific user (`uid`) can perform an action (`permission`) in a specific workspace (`orgId`). It computes this by checking the user's assigned role and cross-referencing it against the Boolean permission flags defined for that role.
+* **Why it's important:** Ensures strict application security. By abstracting the `can()` function, the extension securely verifies if someone is an Admin, Editor, or Viewer before allowing destructive actions like deleting a session or modifying roles.
 
-## 6. Popup UI (`popup.js`, `styles.css`)
+#### `invite-manager.js`
+* **What it does:** Controls the generation and redemption lifecycle of organization invite links.
+* **How it does it:** Generates cryptographic hashes for invites, sets expiration parameters or max uses, and handles the background logic when a new user validates the token (adding them as a pending member to the respective organization).
+* **Why it's important:** It securely automates user onboarding, allowing organizations to cleanly scale and invite teammates without requiring manual admin intervention for every single new user.
 
-The popup acts as the primary control center.
+#### `permission-manager.js`
+* **What it does:** A thin routing file that coordinates capability checks.
+* **How it does it:** Works as a middleware alongside `role-manager.js` to standardize access-control requests passing from the UI to the background layer.
+* **Why it's important:** Keeps the codebase clean by centralizing where and how permissions are evaluated and routed.
 
-*   **Reactivity**: It relies on `chrome.storage.local` to render its view. It listens for runtime messages like `CLOUD_UPDATED` and `RECORDING_UPDATED` to instantly refresh the displayed list.
-*   **Session Management**: Allows creating, restoring, sharing, and deleting sessions. Restoring a session simply iterates through the saved `tabs` array and calls `chrome.tabs.create`.
-*   **Admin Panel**: If the user is a `board` member, an extra "Pending Approvals" section appears, allowing them to approve new SC/Board registrations.
-*   **Status Indicators**: Displays real-time sync status ("Syncing", "Synced", "Live") using CSS animations.
+### Service Workers & Injection
 
-## 7. Overcoming Manifest V3 Restrictions
+#### `background.js`
+* **What it does:** The central nervous system of the extension. Runs continuously in the browser's background.
+* **How it does it:** Uses `chrome.runtime.onMessage.addListener` to act as a massive router, receiving requests heavily from UI files (Dashboard/Popup) and delegating them to the appropriate Managers. It orchestrates tab grouping mechanics, recording lifecycles, caching operations, and user privacy states.
+* **Why it's important:** It is the only file that remains active regardless of what tab the user is viewing. It handles all heavy lifting, background synchronization, listening to browser-level events (like tab closures), and data preservation.
 
-1.  **Service Worker Lifecycle**: Since background scripts can constantly terminate, global variables reset. The extension rehydrates critical context (like active recording state) from `chrome.storage.session` every time the service worker wakes up before evaluating tab events.
-2.  **No Dynamic Code Execution**: Directly integrating standard Firebase web SDKs often fails in MV3 due to Content Security Policy (CSP) blocking `eval` or remote fetching. Building a custom wrapper (`firebase-rest.js`) over the standard Google Cloud/Firebase REST endpoints mitigates this entirely.
-3.  **Persistent Connectivity**: Periodic polling and debounced saving ensures state synchronization without relying on long-lived connections that MV3 service workers frequently abruptly kill.
+#### `content.js`
+* **What it does:** A script injected seamlessly into active browsing tabs that the user visits.
+* **How it does it:** Listens to native browser DOM events (like the `scroll` event) to track exactly how far down a page a user currently is. It sends this `scrollTop` percentage context back to `background.js`.
+* **Why it's important:** Enables the magical "Live Resume" feature. When a user restores a saved Session, the extension utilizes this to set the scroll percentage down the page automatically, allowing the user to resume visual work instantly exactly where they left off.
+
+### Graphical User Interfaces (UI)
+
+#### `auth.html` & `auth.js`
+* **What it does:** The authentication gateway.
+* **How it does it:** Presents login and registration forms to the user. On submission, `auth.js` invokes `firebase-rest.js` endpoints to securely receive an Identity Token. It then writes this token safely into `chrome.storage.local`.
+* **Why it's important:** Protects user privacy by ensuring all operations require identity verification. It is the gatekeeper that allows Firestore to authorize database read/writes based on the verified User ID.
+
+#### `popup.html` & `popup.js` & `styles.css`
+* **What it does:** The immediate interaction drop-down accessible via clicking the Extension Icon near the URL bar.
+* **How it does it:** Uses standard DOM manipulation to render active tabs. `popup.js` sends event messages to `background.js` to trigger "Start Recording", "Save Session", or swap Active Workspaces. `styles.css` themes it beautifully.
+* **Why it's important:** This is the highest-traffic user interface. It needs to be lightweight and fast, allowing users to capture their context quickly without breaking their mental flow.
+
+#### `dashboard.html` & `dashboard.js` & `dashboard.css`
+* **What it does:** The primary full-page Admin Application and Team Explorer.
+* **How it does it:** `dashboard.html` outlines a complex App layout with a sidebar and multi-panel views. `dashboard.js` dynamically pulls lists (Sessions, Roles, Members, Invites) largely from local storage (or requests deep fetches from background), rendering them into interactive tables and modals. `dashboard.css` powers the structural grids, sleek animations, and premium data-swatches.
+* **Why it's important:** Provides the indispensable "Command Center". As Workspaces grow, users need a powerful, large-format interface to manage role hierarchies, resolve "Pending" invites, adjust RBAC permissions, and browse deep historical session logs.
